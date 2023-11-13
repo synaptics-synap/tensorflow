@@ -34,6 +34,10 @@ if(NOT flatbuffers_POPULATED)
   OverridableFetchContent_Populate(flatbuffers)
 endif()
 
+set(FLATBUFFERS_LOCALE_INDEPENDENT 0)
+include(CheckCXXSymbolExists)
+add_definitions(-DFLATBUFFERS_LOCALE_INDEPENDENT=$<BOOL:${FLATBUFFERS_LOCALE_INDEPENDENT}>)
+
 option(FLATBUFFERS_BUILD_TESTS OFF)
 # Required for Windows, since it has macros called min & max which
 # clashes with std::min
