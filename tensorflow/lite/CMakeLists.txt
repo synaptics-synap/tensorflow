@@ -450,12 +450,13 @@ if(TFLITE_ENABLE_GPU)
      target_link_libraries(${lib_name})
    endforeach()
 endif()
-  list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DCL_DELEGATE_NO_GL" "-DEGL_NO_X11")
+  list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DCL_DELEGATE_NO_GL" "-DEGL_NO_X11" "-DCL_TARGET_OPENCL_VERSION=300")
   list(APPEND TFLITE_TARGET_DEPENDENCIES
     absl::any
     absl::flat_hash_map
   )
 endif()
+
 if(_TFLITE_ENABLE_NNAPI)
   find_package(fp16_headers REQUIRED)
   populate_tflite_source_vars("delegates/nnapi"

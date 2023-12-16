@@ -18,9 +18,9 @@ limitations under the License.
 
 #ifdef CL_DELEGATE_NO_GL
 #define EGL_NO_PROTOTYPES
-#endif
-
+#else
 #include <EGL/egl.h>
+#endif
 
 #include <cstdint>
 #include <memory>
@@ -120,8 +120,10 @@ struct InferenceEnvironmentOptions {
   // It is the error to set egl_display, egl_context AND context at the same
   // time. If egl_display and egl_context are set, they will be used to create
   // GL-aware CL context.
+#ifndef CL_DELEGATE_NO_GL
   EGLDisplay egl_display = EGL_NO_DISPLAY;
   EGLContext egl_context = EGL_NO_CONTEXT;
+#endif
 
   // Should contain data returned from
   // InferenceEnvironment::GetSerializedBinaryCache method.
@@ -129,9 +131,11 @@ struct InferenceEnvironmentOptions {
   // incompatible when GPU driver is updated.
   absl::Span<const uint8_t> serialized_binary_cache;
 
+#ifndef CL_DELEGATE_NO_GL
   bool IsGlAware() const {
     return egl_context != EGL_NO_CONTEXT && egl_display != EGL_NO_DISPLAY;
   }
+#endif
 };
 
 // Creates new OpenCL environment that needs to stay around until all inference

@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "tensorflow/lite/delegates/gpu/delegate.h"
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 #include <android/hardware_buffer.h>
 #endif
 
@@ -56,7 +56,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/tflite_profile.h"
 #include "tensorflow/lite/delegates/serialization.h"
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 #include "tensorflow/lite/delegates/gpu/async_buffers.h"
 #include "tensorflow/lite/delegates/gpu/gl/android_sync.h"
 #include "tensorflow/lite/delegates/gpu/gl/egl_environment.h"
@@ -76,7 +76,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/gl/api2.h"
 #endif
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 using tflite::delegates::utils::BufferAttributes;
 using tflite::delegates::utils::BufferType;
 using tflite::delegates::utils::ConvertToTfLiteStatus;
@@ -222,7 +222,7 @@ class Delegate {
   bool async_;
 
   friend class DelegateKernelCore;
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
   friend TfLiteRegistration CreateAsyncRegistration();
 #endif
 };
@@ -684,7 +684,7 @@ class DelegateKernel {
   std::thread::id thread_id_prepare_;  // thread id used for Prepare()
 };
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 using BackendAsyncKernelInterface =
     ::tflite::delegates::BackendAsyncKernelInterface;
 
@@ -1294,7 +1294,7 @@ TfLiteRegistration CreateRegistration() {
   };
 }
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 TfLiteRegistration CreateAsyncRegistration() {
   return TfLiteRegistration{
       // .init
@@ -1354,7 +1354,7 @@ TfLiteStatus DelegatePrepare(TfLiteContext* context, TfLiteDelegate* delegate) {
   auto* gpu_delegate = GetDelegate(delegate);
 
   const TfLiteRegistration kRegistration =
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
       gpu_delegate->async() ? CreateAsyncRegistration() : CreateRegistration();
 #else
       CreateRegistration();
@@ -1405,7 +1405,7 @@ TfLiteDelegate* TfLiteGpuDelegateV2Create(
   return gpu_delegate ? gpu_delegate->tflite_delegate() : nullptr;
 }
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && !defined(CL_DELEGATE_NO_GL)
 TfLiteDelegate* TfLiteGpuDelegateV2CreateAsync(
     const TfLiteGpuDelegateOptionsV2* options) {
   // We depend on the availability of AHardwareBuffer.

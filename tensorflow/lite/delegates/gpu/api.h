@@ -48,7 +48,9 @@ limitations under the License.
 
 #define GL_NO_PROTOTYPES
 #define EGL_NO_PROTOTYPES
+#ifndef CL_DELEGATE_NO_GL
 #include "tensorflow/lite/delegates/gpu/gl/portable_gl31.h"
+#endif
 #undef GL_NO_PROTOTYPES
 #undef EGL_NO_PROTOTYPES
 
@@ -80,6 +82,13 @@ enum class ObjectType {
   VULKAN_BUFFER,
   VULKAN_TEXTURE
 };
+
+#ifdef CL_DELEGATE_NO_GL
+#define GLuint int
+#define GLenum int
+#define GL_INVALID_INDEX 0
+#define GL_INVALID_ENUM 0
+#endif
 
 struct OpenGlBuffer {
   OpenGlBuffer() = default;
@@ -230,7 +239,11 @@ bool IsValid(const TensorObjectDef& def);
 uint32_t NumElements(const TensorObjectDef& def);
 
 using TensorObject =
+#ifndef CL_DELEGATE_NO_GL
     std::variant<std::monostate, OpenGlBuffer, OpenGlTexture, CpuMemory,
+#else
+    std::variant<std::monostate, CpuMemory,
+#endif
                  OpenClBuffer, OpenClTexture, VulkanBuffer, VulkanTexture>;
 
 // @return true if object is set and corresponding values are defined.

@@ -23,10 +23,12 @@ namespace {
 
 struct ObjectTypeGetter {
   ObjectType operator()(std::monostate) const { return ObjectType::UNKNOWN; }
+#ifndef CL_DELEGATE_NO_GL
   ObjectType operator()(OpenGlBuffer) const { return ObjectType::OPENGL_SSBO; }
   ObjectType operator()(OpenGlTexture) const {
     return ObjectType::OPENGL_TEXTURE;
   }
+#endif
   ObjectType operator()(OpenClBuffer) const {
     return ObjectType::OPENCL_BUFFER;
   }
@@ -44,10 +46,12 @@ struct ObjectTypeGetter {
 
 struct ObjectValidityChecker {
   bool operator()(std::monostate) const { return false; }
+#ifndef CL_DELEGATE_NO_GL
   bool operator()(OpenGlBuffer obj) const { return obj.id != GL_INVALID_INDEX; }
   bool operator()(OpenGlTexture obj) const {
     return obj.id != GL_INVALID_INDEX && obj.format != GL_INVALID_ENUM;
   }
+#endif
   bool operator()(OpenClBuffer obj) const { return obj.memobj; }
   bool operator()(OpenClTexture obj) const { return obj.memobj; }
   bool operator()(VulkanBuffer obj) const { return obj.memory; }
@@ -83,10 +87,12 @@ bool IsObjectPresent(ObjectType type, const TensorObject& obj) {
   switch (type) {
     case ObjectType::CPU_MEMORY:
       return std::holds_alternative<CpuMemory>(obj);
+#ifndef CL_DELEGATE_NO_GL
     case ObjectType::OPENGL_SSBO:
       return std::holds_alternative<OpenGlBuffer>(obj);
     case ObjectType::OPENGL_TEXTURE:
       return std::holds_alternative<OpenGlTexture>(obj);
+#endif
     case ObjectType::OPENCL_BUFFER:
       return std::holds_alternative<OpenClBuffer>(obj);
     case ObjectType::OPENCL_TEXTURE:
