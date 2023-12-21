@@ -88,6 +88,9 @@ add_executable(benchmark_model
   EXCLUDE_FROM_ALL
   ${TFLITE_BENCHMARK_SRCS}
 )
+
+target_link_options(benchmark_model PUBLIC $<$<CONFIG:RELEASE>:-s>)
+
 target_compile_options(benchmark_model
   PRIVATE
     ${TFLITE_BENCHMARK_CC_OPTIONS}
@@ -95,3 +98,4 @@ target_compile_options(benchmark_model
 target_link_libraries(benchmark_model
     ${TFLITE_BENCHMARK_LIBS}
 )
+
