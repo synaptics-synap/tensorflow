@@ -141,6 +141,8 @@ PowerVRGpu GetPowerVRGpuVersion(const std::string& gpu_description) {
   const std::vector<std::pair<std::string, PowerVRGpu>> kMapping = {
       {"rogue gm9", PowerVRGpu::kRogueGm9xxx},    // From OpenGL
       {"powervr gm9", PowerVRGpu::kRogueGm9xxx},  /// From OpenCL
+      {"rogue ge9", PowerVRGpu::kRogueGe9xxx},    // From OpenGL
+      {"powervr ge9", PowerVRGpu::kRogueGe9xxx},  /// From OpenCL
       {"rogue ge8", PowerVRGpu::kRogueGe8xxx},    // From OpenGL
       {"powervr ge8", PowerVRGpu::kRogueGe8xxx},  /// From OpenCL
       {"rogue", PowerVRGpu::kRogue},
@@ -596,6 +598,7 @@ PowerVRInfo::PowerVRInfo(const std::string& gpu_description)
 bool PowerVRInfo::IsRogue() const {
   return gpu_version == PowerVRGpu::kRogue ||
          gpu_version == PowerVRGpu::kRogueGe8xxx ||
+         gpu_version == PowerVRGpu::kRogueGe9xxx ||
          gpu_version == PowerVRGpu::kRogueGm9xxx;
 }
 

@@ -264,6 +264,7 @@ struct MaliInfo {
 };
 
 enum class PowerVRGpu {
+  kRogueGe9xxx,
   kRogueGm9xxx,
   kRogueGe8xxx,
   kRogue,
