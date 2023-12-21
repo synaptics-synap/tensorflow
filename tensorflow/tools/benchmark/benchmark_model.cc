@@ -396,6 +396,7 @@ int Main(int argc, char** argv) {
   bool show_summary = true;
   bool show_flops = false;
   int warmup_runs = 1;
+  string tf_version = "";
 
   std::vector<Flag> flag_list = {
       Flag("graph", &graph, "graph file name"),
@@ -431,6 +432,7 @@ int Main(int argc, char** argv) {
            "whether to show a summary of the stats"),
       Flag("show_flops", &show_flops, "whether to estimate the model's FLOPs"),
       Flag("warmup_runs", &warmup_runs, "how many runs to initialize model"),
+      Flag("version", &tf_version, "tensoflow version"),
   };
   string usage = Flags::Usage(argv[0], flag_list);
   const bool parse_result = Flags::Parse(&argc, argv, flag_list);
@@ -488,6 +490,7 @@ int Main(int argc, char** argv) {
   LOG(INFO) << "Output prefix: [" << output_prefix << "]";
   LOG(INFO) << "Show sizes: [" << show_sizes << "]";
   LOG(INFO) << "Warmup runs: [" << warmup_runs << "]";
+  LOG(INFO) << "Tensorflow Version: [" << tf_version << "]";
 
   std::unique_ptr<Session> session;
   std::unique_ptr<StatSummarizer> stats;

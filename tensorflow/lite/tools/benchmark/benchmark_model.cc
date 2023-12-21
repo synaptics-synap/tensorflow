@@ -28,6 +28,7 @@ limitations under the License.
 #include "tensorflow/lite/profiling/time.h"
 #include "tensorflow/lite/tools/benchmark/benchmark_utils.h"
 #include "tensorflow/lite/tools/logging.h"
+#include "tensorflow/lite/version.h"
 
 namespace tflite {
 namespace benchmark {
@@ -71,6 +72,7 @@ BenchmarkParams BenchmarkModel::DefaultParams() {
                   BenchmarkParam::Create<bool>(false));
   params.AddParam("memory_footprint_check_interval_ms",
                   BenchmarkParam::Create<int32_t>(kMemoryCheckIntervalMs));
+  params.AddParam("version", BenchmarkParam::Create<std::string>(TFLITE_VERSION_STRING));
   return params;
 }
 
@@ -171,7 +173,8 @@ std::vector<Flag> BenchmarkModel::GetFlags() {
       CreateFlag<int32_t>("memory_footprint_check_interval_ms", &params_,
                           "The interval in millisecond between two consecutive "
                           "memory footprint checks. This is only used when "
-                          "--report_peak_memory_footprint is set to true.")};
+                          "--report_peak_memory_footprint is set to true."),
+      CreateFlag<std::string>("version", &params_, "version")};
 }
 
 void BenchmarkModel::LogParams() {
@@ -198,6 +201,7 @@ void BenchmarkModel::LogParams() {
                       "Report the peak memory footprint", verbose);
   LOG_BENCHMARK_PARAM(int32_t, "memory_footprint_check_interval_ms",
                       "Memory footprint check interval (ms)", verbose);
+  LOG_BENCHMARK_PARAM(std::string, "version", "Tensorflow Vesion", verbose);
 }
 
 TfLiteStatus BenchmarkModel::PrepareInputData() { return kTfLiteOk; }
@@ -344,6 +348,13 @@ TfLiteStatus BenchmarkModel::ParseFlags(int* argc, char** argv) {
   auto flag_list = GetFlags();
   const bool parse_result =
       Flags::Parse(argc, const_cast<const char**>(argv), flag_list);
+
+  if (parse_result && (params_.HasParam("version"))) {
+      std::string version = params_.Get<std::string>("version");
+      TFLITE_LOG(INFO) << "Tensorflow Version : " << version;
+      return kTfLiteOk;
+  }
+
   // "--help" flag is added in tools/delegates/default_execution_provider.cc. As
   // this is an optional dependency, we need to check whether "--help" exists or
   // not first.
