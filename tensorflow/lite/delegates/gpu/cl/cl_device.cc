@@ -28,6 +28,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/cl/util.h"
 #include "tensorflow/lite/delegates/gpu/common/status.h"
 #include "tensorflow/lite/experimental/acceleration/compatibility/android_info.h"
+#include "tensorflow/lite/minimal_logging.h"
 
 namespace tflite {
 namespace gpu {
@@ -208,6 +209,9 @@ GpuInfo GpuInfoFromDeviceID(cl_device_id id, cl_platform_id platform_id) {
   const std::string gpu_description = absl::StrCat(
       info.opencl_info.device_name, " ", info.opencl_info.vendor_name, " ",
       info.opencl_info.opencl_c_version);
+
+  TFLITE_LOG_PROD_ONCE(TFLITE_LOG_INFO, "OpenCL info: %s", gpu_description.c_str());
+
   GetGpuInfoFromDeviceDescription(gpu_description, GpuApi::kOpenCl, &info);
   info.opencl_info.cl_version =
       ParseCLVersion(info.opencl_info.opencl_c_version);
