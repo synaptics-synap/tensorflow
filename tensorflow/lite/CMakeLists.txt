@@ -74,6 +74,9 @@ option(TFLITE_ENABLE_METAL "Enable Metal delegate (iOS only)" OFF)
 option(TFLITE_ENABLE_XNNPACK "Enable XNNPACK backend" ON)
 option(TFLITE_ENABLE_EXTERNAL_DELEGATE "Enable External Delegate backend" ON)
 
+option(TFLITE_BUILD_SHARED_LIB_FAT "Build fat shared library including all its dependencies" OFF)
+
+
 option(TFLITE_KERNEL_TEST "Enable tflite kernel unit test" OFF)
 if(TFLITE_KERNEL_TEST AND ${CMAKE_CROSSCOMPILING})
   set(TFLITE_HOST_TOOLS_DIR "" CACHE PATH "Host tools directory")
@@ -617,9 +620,32 @@ set(_ALL_TFLITE_SRCS
   ${TFLITE_SOURCE_DIR}/schema/schema_utils.cc
   ${TFLITE_SOURCE_DIR}/schema/schema_generated.h
 )
-add_library(tensorflow-lite
-  ${_ALL_TFLITE_SRCS}
-)
+
+if(TFLITE_BUILD_SHARED_LIB_FAT)
+  add_library(tensorflow-lite SHARED ${_ALL_TFLITE_SRCS})
+  # Strip binaries in release mode.
+  target_link_options(tensorflow-lite PUBLIC $<$<CONFIG:RELEASE>:-s>)
+
+  # Very complicated but we cannot use standard install() here without major surgery
+  # as it will install much more the tflite headers including all the 3rd party headers.
+  set(TFLITE_HDRS ${_ALL_TFLITE_SRCS})
+  list(FILTER TFLITE_HDRS INCLUDE REGEX ".*\\.h$")
+  # Remove kernels headers from TFLITE_HDRS, not needed for shared lib except for kernels/register.h
+  file(GLOB_RECURSE TFLITE_KERNELS_HDR kernels/*.h)
+  list(REMOVE_ITEM TFLITE_HDRS ${TFLITE_KERNELS_HDR})
+  file(GLOB TFLITE_GPU_MISSING_HDRS delegates/gpu/*.h ${TFLITE_SOURCE_DIR}/kernels/register.h)
+  list(APPEND TFLITE_HDRS ${TFLITE_GPU_MISSING_HDRS})
+  set(HDRS_DEST ${TFLITE_HDRS})
+  list(TRANSFORM HDRS_DEST REPLACE "${TFLITE_SOURCE_DIR}" "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/tensorflow/lite")
+  foreach(hdr hdr_dest IN ZIP_LISTS TFLITE_HDRS HDRS_DEST)
+    get_filename_component(hdr_dest_dir ${hdr_dest} DIRECTORY)
+    file(MAKE_DIRECTORY ${hdr_dest_dir})
+    file(COPY_FILE ${hdr} ${hdr_dest} ONLY_IF_DIFFERENT)
+  endforeach()
+else()
+  add_library(tensorflow-lite STATIC ${_ALL_TFLITE_SRCS})
+endif()
+
 set(_ALL_TFLITE_HDRS ${_ALL_TFLITE_SRCS})
 list(FILTER _ALL_TFLITE_HDRS INCLUDE REGEX ".*\\.h$")
 target_include_directories(tensorflow-lite
