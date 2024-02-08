@@ -1017,6 +1017,11 @@ class Subgraph {
     if (delegate.transient_indirection_buffer()) {
       flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
     }
+
+    if (context->allow_fp32_relax_to_fp16) {
+        delegate.options_.flags |= TFLITE_XNNPACK_DELEGATE_FLAG_FORCE_FP16;
+    }
+
     if (delegate.force_fp16()) {
       flags |= XNN_FLAG_FORCE_FP16_INFERENCE;
     } else {
